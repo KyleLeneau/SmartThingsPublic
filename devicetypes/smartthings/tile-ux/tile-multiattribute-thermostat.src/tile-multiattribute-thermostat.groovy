@@ -30,12 +30,13 @@ metadata {
 	}
 
 	tiles(scale: 2) {
-		multiAttributeTile(name:"thermostatMulti", type:"thermostat", width:6, height:4) {
+		multiAttributeTile(name:"thermostatFull", type:"thermostat", width:6, height:4) {
 			tileAttribute("device.temperature", key: "PRIMARY_CONTROL") {
 				attributeState("default", label:'${currentValue}', unit:"dF")
 			}
 			tileAttribute("device.temperature", key: "VALUE_CONTROL") {
-				attributeState("default", action: "setTemperature")
+				attributeState("VALUE_UP", action: "tempUp")
+				attributeState("VALUE_DOWN", action: "tempDown")
 			}
 			tileAttribute("device.humidity", key: "SECONDARY_CONTROL") {
 				attributeState("default", label:'${currentValue}%', unit:"%")
@@ -58,10 +59,116 @@ metadata {
 				attributeState("default", label:'${currentValue}', unit:"dF")
 			}
 		}
+		multiAttributeTile(name:"thermostatNoHumidity", type:"thermostat", width:6, height:4) {
+			tileAttribute("device.temperature", key: "PRIMARY_CONTROL") {
+				attributeState("default", label:'${currentValue}', unit:"dF")
+			}
+			tileAttribute("device.temperature", key: "VALUE_CONTROL") {
+				attributeState("VALUE_UP", action: "tempUp")
+				attributeState("VALUE_DOWN", action: "tempDown")
+			}
+			tileAttribute("device.thermostatOperatingState", key: "OPERATING_STATE") {
+				attributeState("idle", backgroundColor:"#44b621")
+				attributeState("heating", backgroundColor:"#ffa81e")
+				attributeState("cooling", backgroundColor:"#269bd2")
+			}
+			tileAttribute("device.thermostatMode", key: "THERMOSTAT_MODE") {
+				attributeState("off", label:'${name}')
+				attributeState("heat", label:'${name}')
+				attributeState("cool", label:'${name}')
+				attributeState("auto", label:'${name}')
+			}
+			tileAttribute("device.heatingSetpoint", key: "HEATING_SETPOINT") {
+				attributeState("default", label:'${currentValue}', unit:"dF")
+			}
+			tileAttribute("device.coolingSetpoint", key: "COOLING_SETPOINT") {
+				attributeState("default", label:'${currentValue}', unit:"dF")
+			}
+		}
+		multiAttributeTile(name:"thermostatBasic", type:"thermostat", width:6, height:4) {
+			tileAttribute("device.temperature", key: "PRIMARY_CONTROL") {
+				attributeState("default", label:'${currentValue}', unit:"dF",
+				backgroundColors:[
+					[value: 31, color: "#153591"],
+					[value: 44, color: "#1e9cbb"],
+					[value: 59, color: "#90d2a7"],
+					[value: 74, color: "#44b621"],
+					[value: 84, color: "#f1d801"],
+					[value: 95, color: "#d04e00"],
+					[value: 96, color: "#bc2323"]
+				])
+			}
+			tileAttribute("device.temperature", key: "VALUE_CONTROL") {
+				attributeState("VALUE_UP", action: "tempUp")
+				attributeState("VALUE_DOWN", action: "tempDown")
+			}
+		}
 
-		main("thermostatMulti")
+		valueTile("temperature", "device.temperature", width: 2, height: 2) {
+			state("temperature", label:'${currentValue}', unit:"dF",
+				backgroundColors:[
+					[value: 31, color: "#153591"],
+					[value: 44, color: "#1e9cbb"],
+					[value: 59, color: "#90d2a7"],
+					[value: 74, color: "#44b621"],
+					[value: 84, color: "#f1d801"],
+					[value: 95, color: "#d04e00"],
+					[value: 96, color: "#bc2323"]
+				]
+			)
+		}
+		standardTile("tempDown", "device.temperature", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "default", label:'down', action:"tempDown"
+		}
+		standardTile("tempUp", "device.temperature", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "default", label:'up', action:"tempUp"
+		}
+
+		valueTile("heatingSetpoint", "device.heatingSetpoint", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "heat", label:'${currentValue} heat', unit: "F", backgroundColor:"#ffffff"
+		}
+		standardTile("heatDown", "device.temperature", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "default", label:'down', action:"heatDown"
+		}
+		standardTile("heatUp", "device.temperature", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "default", label:'up', action:"heatUp"
+		}
+
+		valueTile("coolingSetpoint", "device.coolingSetpoint", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "cool", label:'${currentValue} cool', unit:"F", backgroundColor:"#ffffff"
+		}
+		standardTile("coolDown", "device.temperature", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "default", label:'down', action:"coolDown"
+		}
+		standardTile("coolUp", "device.temperature", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "default", label:'up', action:"coolUp"
+		}
+
+		standardTile("mode", "device.thermostatMode", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "off", label:'${name}', action:"thermostat.heat", backgroundColor:"#ffffff"
+			state "heat", label:'${name}', action:"thermostat.cool", backgroundColor:"#ffa81e"
+			state "cool", label:'${name}', action:"thermostat.auto", backgroundColor:"#269bd2"
+			state "auto", label:'${name}', action:"thermostat.off", backgroundColor:"#79b821"
+		}
+		standardTile("fanMode", "device.thermostatFanMode", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "fanAuto", label:'${name}', action:"thermostat.fanOn", backgroundColor:"#ffffff"
+			state "fanOn", label:'${name}', action:"thermostat.fanCirculate", backgroundColor:"#ffffff"
+			state "fanCirculate", label:'${name}', action:"thermostat.fanAuto", backgroundColor:"#ffffff"
+		}
+		standardTile("operatingState", "device.thermostatOperatingState", width: 2, height: 2) {
+			state "idle", label:'${name}', backgroundColor:"#ffffff"
+			state "heating", label:'${name}', backgroundColor:"#ffa81e"
+			state "cooling", label:'${name}', backgroundColor:"#269bd2"
+		}
+
+
+		main("thermostatFull")
 		details([
-			"thermostatMulti"
+			"thermostatFull", "thermostatNoHumidity", "thermostatBasic"
+			"temperature","tempDown","tempUp",
+			"mode", "fanMode", "operatingState",
+			"heatingSetpoint", "heatDown", "heatUp",
+			"coolingSetpoint", "coolDown", "coolUp"
 		])
 	}
 }
@@ -112,6 +219,11 @@ def evaluate(temp, heatingSetpoint, coolingSetpoint) {
 	else {
 		sendEvent(name: "thermostatSetpoint", value: heatingSetpoint)
 	}
+
+	if (mode == "off") {
+		idle = true
+	}
+	
 	if (idle && !heating && !cooling) {
 		sendEvent(name: "thermostatOperatingState", value: "idle")
 	}
