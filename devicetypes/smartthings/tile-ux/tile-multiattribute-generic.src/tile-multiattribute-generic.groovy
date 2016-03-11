@@ -12,7 +12,7 @@
  *
  */
 metadata {
-	definition (name: "Genreic Multi-Attribute", namespace: "smartthings/tile-ux", author: "SmartThings") {
+	definition (name: "genericDeviceTile", namespace: "smartthings/tile-ux", author: "SmartThings") {
 		capability "Actuator"
 		capability "Switch"
 		capability "Switch Level"
