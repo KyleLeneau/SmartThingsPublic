@@ -1,5 +1,5 @@
 /**
- *  Copyright 2015 SmartThings
+ *  Copyright 2016 SmartThings, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -13,7 +13,7 @@
  */
 metadata {
 	definition (
-		name: "thermostatDeviceTile", 
+		name: "thermostatDeviceTile",
 		namespace: "smartthings/tile-ux",
 		author: "SmartThings") {
 
@@ -223,7 +223,7 @@ def evaluate(temp, heatingSetpoint, coolingSetpoint) {
 	if (mode == "off") {
 		idle = true
 	}
-	
+
 	if (idle && !heating && !cooling) {
 		sendEvent(name: "thermostatOperatingState", value: "idle")
 	}
