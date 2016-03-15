@@ -17,213 +17,195 @@ metadata {
 		namespace: "smartthings/tile-ux",
 		author: "SmartThings") {
 
-		capability "Thermostat"
-		capability "Relative Humidity Measurement"
+		capability "Switch Level"
+		capability "Actuator"
+		capability "Color Control"
+		capability "Power Meter"
+		capability "Switch"
+		capability "Refresh"
+		capability "Sensor"
 
-		command "tempUp"
-		command "tempDown"
-		command "heatUp"
-		command "heatDown"
-		command "coolUp"
-		command "coolDown"
-		command "setTemperature", ["number"]
+		command "setAdjustedColor"
+		command "reset"
+		command "refresh"
 	}
 
 	tiles(scale: 2) {
-		multiAttributeTile(name:"thermostatMulti", type:"thermostat", width:6, height:4) {
-			tileAttribute("device.temperature", key: "PRIMARY_CONTROL") {
-				attributeState("default", label:'${currentValue}', unit:"dF")
+		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: true) {
+			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+				attributeState "on", label:'${name}', action:"switch.off", icon:"st.lights.philips.hue-single", backgroundColor:"#79b821", nextState:"turningOff"
+				attributeState "off", label:'${name}', action:"switch.on", icon:"st.lights.philips.hue-single", backgroundColor:"#ffffff", nextState:"turningOn"
+				attributeState "turningOn", label:'${name}', action:"switch.off", icon:"st.lights.philips.hue-single", backgroundColor:"#79b821", nextState:"turningOff"
+				attributeState "turningOff", label:'${name}', action:"switch.on", icon:"st.lights.philips.hue-single", backgroundColor:"#ffffff", nextState:"turningOn"
 			}
-			tileAttribute("device.temperature", key: "VALUE_CONTROL") {
-				attributeState("default", action: "setTemperature")
+			tileAttribute ("device.power", key: "SECONDARY_CONTROL") {
+				attributeState "power", label:'Power level: ${currentValue}W', icon: "st.Appliances.appliances17"
 			}
-			tileAttribute("device.humidity", key: "SECONDARY_CONTROL") {
-				attributeState("default", label:'${currentValue}%', unit:"%")
+			tileAttribute ("device.level", key: "SLIDER_CONTROL") {
+				attributeState "level", action:"switch level.setLevel"
 			}
-			tileAttribute("device.thermostatOperatingState", key: "OPERATING_STATE") {
-				attributeState("idle", backgroundColor:"#44b621")
-				attributeState("heating", backgroundColor:"#ffa81e")
-				attributeState("cooling", backgroundColor:"#269bd2")
-			}
-			tileAttribute("device.thermostatMode", key: "THERMOSTAT_MODE") {
-				attributeState("off", label:'${name}')
-				attributeState("heat", label:'${name}')
-				attributeState("cool", label:'${name}')
-				attributeState("auto", label:'${name}')
-			}
-			tileAttribute("device.heatingSetpoint", key: "HEATING_SETPOINT") {
-				attributeState("default", label:'${currentValue}', unit:"dF")
-			}
-			tileAttribute("device.coolingSetpoint", key: "COOLING_SETPOINT") {
-				attributeState("default", label:'${currentValue}', unit:"dF")
+			tileAttribute ("device.color", key: "COLOR_CONTROL") {
+				attributeState "color", action:"setAdjustedColor"
 			}
 		}
 
-		main("thermostatMulti")
-		details([
-			"thermostatMulti"
-		])
-	}
-}
-
-def installed() {
-	sendEvent(name: "temperature", value: 72, unit: "F")
-	sendEvent(name: "heatingSetpoint", value: 70, unit: "F")
-	sendEvent(name: "thermostatSetpoint", value: 70, unit: "F")
-	sendEvent(name: "coolingSetpoint", value: 76, unit: "F")
-	sendEvent(name: "thermostatMode", value: "off")
-	sendEvent(name: "thermostatFanMode", value: "fanAuto")
-	sendEvent(name: "thermostatOperatingState", value: "idle")
-	sendEvent(name: "humidity", value: 53, unit: "%")
-}
-
-def parse(String description) {
-}
-
-def evaluate(temp, heatingSetpoint, coolingSetpoint) {
-	log.debug "evaluate($temp, $heatingSetpoint, $coolingSetpoint"
-	def threshold = 1.0
-	def current = device.currentValue("thermostatOperatingState")
-	def mode = device.currentValue("thermostatMode")
-
-	def heating = false
-	def cooling = false
-	def idle = false
-	if (mode in ["heat","emergency heat","auto"]) {
-		if (heatingSetpoint - temp >= threshold) {
-			heating = true
-			sendEvent(name: "thermostatOperatingState", value: "heating")
+		multiAttributeTile(name:"switchNoPower", type: "lighting", width: 6, height: 4, canChangeIcon: true) {
+			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+				attributeState "on", label:'${name}', action:"switch.off", icon:"st.lights.philips.hue-single", backgroundColor:"#79b821", nextState:"turningOff"
+				attributeState "off", label:'${name}', action:"switch.on", icon:"st.lights.philips.hue-single", backgroundColor:"#ffffff", nextState:"turningOn"
+				attributeState "turningOn", label:'${name}', action:"switch.off", icon:"st.lights.philips.hue-single", backgroundColor:"#79b821", nextState:"turningOff"
+				attributeState "turningOff", label:'${name}', action:"switch.on", icon:"st.lights.philips.hue-single", backgroundColor:"#ffffff", nextState:"turningOn"
+			}
+			tileAttribute ("device.level", key: "SLIDER_CONTROL") {
+				attributeState "level", action:"switch level.setLevel"
+			}
+			tileAttribute ("device.color", key: "COLOR_CONTROL") {
+				attributeState "color", action:"setAdjustedColor"
+			}
 		}
-		else if (temp - heatingSetpoint >= threshold) {
-			idle = true
+
+		multiAttributeTile(name:"switchNoSlider", type: "lighting", width: 6, height: 4, canChangeIcon: true) {
+			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+				attributeState "on", label:'${name}', action:"switch.off", icon:"st.lights.philips.hue-single", backgroundColor:"#79b821", nextState:"turningOff"
+				attributeState "off", label:'${name}', action:"switch.on", icon:"st.lights.philips.hue-single", backgroundColor:"#ffffff", nextState:"turningOn"
+				attributeState "turningOn", label:'${name}', action:"switch.off", icon:"st.lights.philips.hue-single", backgroundColor:"#79b821", nextState:"turningOff"
+				attributeState "turningOff", label:'${name}', action:"switch.on", icon:"st.lights.philips.hue-single", backgroundColor:"#ffffff", nextState:"turningOn"
+			}
+			tileAttribute ("device.power", key: "SECONDARY_CONTROL") {
+				attributeState "power", label:'The power level is currently: ${currentValue}W', icon: "st.Appliances.appliances17"
+			}
+			tileAttribute ("device.color", key: "COLOR_CONTROL") {
+				attributeState "color", action:"setAdjustedColor"
+			}
 		}
-		sendEvent(name: "thermostatSetpoint", value: heatingSetpoint)
-	}
-	if (mode in ["cool","auto"]) {
-		if (temp - coolingSetpoint >= threshold) {
-			cooling = true
-			sendEvent(name: "thermostatOperatingState", value: "cooling")
+
+		multiAttributeTile(name:"switchNoSliderOrColor", type: "lighting", width: 6, height: 4, canChangeIcon: true) {
+			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+				attributeState "on", label:'${name}', action:"switch.off", icon:"st.lights.philips.hue-single", backgroundColor:"#79b821", nextState:"turningOff"
+				attributeState "off", label:'${name}', action:"switch.on", icon:"st.lights.philips.hue-single", backgroundColor:"#ffffff", nextState:"turningOn"
+				attributeState "turningOn", label:'${name}', action:"switch.off", icon:"st.lights.philips.hue-single", backgroundColor:"#79b821", nextState:"turningOff"
+				attributeState "turningOff", label:'${name}', action:"switch.on", icon:"st.lights.philips.hue-single", backgroundColor:"#ffffff", nextState:"turningOn"
+			}
+			tileAttribute ("device.power", key: "SECONDARY_CONTROL") {
+				attributeState "power", label:'The light is currently consuming this amount of power: ${currentValue}W', icon: "st.Appliances.appliances17"
+			}
 		}
-		else if (coolingSetpoint - temp >= threshold && !heating) {
-			idle = true
+
+		valueTile("color", "device.color", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
+			state "color", label: '${currentValue}'
 		}
-		sendEvent(name: "thermostatSetpoint", value: coolingSetpoint)
+
+		standardTile("reset", "device.reset", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
+			state "default", label:"Reset Color", action:"reset", icon:"st.lights.philips.hue-single"
+		}
+		standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
+			state "default", label:"", action:"refresh.refresh", icon:"st.secondary.refresh"
+		}
+
+		main(["switch"])
+		details(["switch", "switchNoPower", "switchNoSlider", "switchNoSliderOrColor", "color", "refresh", "reset"])
 	}
-	else {
-		sendEvent(name: "thermostatSetpoint", value: heatingSetpoint)
+}
+
+// parse events into attributes
+def parse(description) {
+	log.debug "parse() - $description"
+	def results = []
+	def map = description
+	if (description instanceof String)  {
+		log.debug "Hue Bulb stringToMap - ${map}"
+		map = stringToMap(description)
 	}
-	if (idle && !heating && !cooling) {
-		sendEvent(name: "thermostatOperatingState", value: "idle")
+	if (map?.name && map?.value) {
+		results << createEvent(name: "${map?.name}", value: "${map?.value}")
 	}
+	results
 }
 
-def setHeatingSetpoint(Double degreesF) {
-	log.debug "setHeatingSetpoint($degreesF)"
-	sendEvent(name: "heatingSetpoint", value: degreesF)
-	evaluate(device.currentValue("temperature"), degreesF, device.currentValue("coolingSetpoint"))
-}
-
-def setCoolingSetpoint(Double degreesF) {
-	log.debug "setCoolingSetpoint($degreesF)"
-	sendEvent(name: "coolingSetpoint", value: degreesF)
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), degreesF)
-}
-
-def setThermostatMode(String value) {
-	sendEvent(name: "thermostatMode", value: value)
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def setThermostatFanMode(String value) {
-	sendEvent(name: "thermostatFanMode", value: value)
+// handle commands
+def on() {
+	//log.trace parent.on(this)
+	sendEvent(name: "switch", value: "on")
 }
 
 def off() {
-	sendEvent(name: "thermostatMode", value: "off")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
+	//log.trace parent.off(this)
+	sendEvent(name: "switch", value: "off")
 }
 
-def heat() {
-	sendEvent(name: "thermostatMode", value: "heat")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
+def nextLevel() {
+	def level = device.latestValue("level") as Integer ?: 0
+	if (level <= 100) {
+		level = Math.min(25 * (Math.round(level / 25) + 1), 100) as Integer
+	}
+	else {
+		level = 25
+	}
+	setLevel(level)
 }
 
-def auto() {
-	sendEvent(name: "thermostatMode", value: "auto")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
+def setLevel(percent) {
+	log.debug "setLevel: ${percent}, this"
+	sendEvent(name: "level", value: percent)
+	def power = Math.round(percent / 1.175) * 0.1
+	sendEvent(name: "power", value: power)
 }
 
-def emergencyHeat() {
-	sendEvent(name: "thermostatMode", value: "emergency heat")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
+def setSaturation(percent) {
+	log.debug "setSaturation: ${percent}, $this"
+	sendEvent(name: "saturation", value: percent)
 }
 
-def cool() {
-	sendEvent(name: "thermostatMode", value: "cool")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
+def setHue(percent) {
+	log.debug "setHue: ${percent}, $this"
+	sendEvent(name: "hue", value: percent)
 }
 
-def fanOn() {
-	sendEvent(name: "thermostatFanMode", value: "fanOn")
+def setColor(value) {
+	log.debug "setColor: ${value}, $this"
+	if (value.hue) { sendEvent(name: "hue", value: value.hue)}
+	if (value.saturation) { sendEvent(name: "saturation", value: value.saturation)}
+	if (value.hex) { sendEvent(name: "color", value: value.hex)}
+	if (value.level) { sendEvent(name: "level", value: value.level)}
+	if (value.switch) { sendEvent(name: "switch", value: value.switch)}
 }
 
-def fanAuto() {
-	sendEvent(name: "thermostatFanMode", value: "fanAuto")
+def reset() {
+	log.debug "Executing 'reset'"
+	setAdjustedColor([level:100, hex:"#90C638", saturation:56, hue:23])
+	//parent.poll()
 }
 
-def fanCirculate() {
-	sendEvent(name: "thermostatFanMode", value: "fanCirculate")
+def setAdjustedColor(value) {
+	if (value) {
+		log.trace "setAdjustedColor: ${value}"
+		def adjusted = value + [:]
+		adjusted.hue = adjustOutgoingHue(value.hue)
+		// Needed because color picker always sends 100
+		adjusted.level = null
+		setColor(adjusted)
+	}
 }
 
-def poll() {
-	null
+def refresh() {
+	log.debug "Executing 'refresh'"
+	//parent.manualRefresh()
 }
 
-def tempUp() {
-	def ts = device.currentState("temperature")
-	def value = ts ? ts.integerValue + 1 : 72
-	sendEvent(name:"temperature", value: value)
-	evaluate(value, device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
+def adjustOutgoingHue(percent) {
+	def adjusted = percent
+	if (percent > 31) {
+		if (percent < 63.0) {
+			adjusted = percent + (7 * (percent -30 ) / 32)
+		}
+		else if (percent < 73.0) {
+			adjusted = 69 + (5 * (percent - 62) / 10)
+		}
+		else {
+			adjusted = percent + (2 * (100 - percent) / 28)
+		}
+	}
+	log.info "percent: $percent, adjusted: $adjusted"
+	adjusted
 }
 
-def tempDown() {
-	def ts = device.currentState("temperature")
-	def value = ts ? ts.integerValue - 1 : 72
-	sendEvent(name:"temperature", value: value)
-	evaluate(value, device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def setTemperature(value) {
-	def ts = device.currentState("temperature")
-	sendEvent(name:"temperature", value: value)
-	evaluate(value, device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def heatUp() {
-	def ts = device.currentState("heatingSetpoint")
-	def value = ts ? ts.integerValue + 1 : 68
-	sendEvent(name:"heatingSetpoint", value: value)
-	evaluate(device.currentValue("temperature"), value, device.currentValue("coolingSetpoint"))
-}
-
-def heatDown() {
-	def ts = device.currentState("heatingSetpoint")
-	def value = ts ? ts.integerValue - 1 : 68
-	sendEvent(name:"heatingSetpoint", value: value)
-	evaluate(device.currentValue("temperature"), value, device.currentValue("coolingSetpoint"))
-}
-
-
-def coolUp() {
-	def ts = device.currentState("coolingSetpoint")
-	def value = ts ? ts.integerValue + 1 : 76
-	sendEvent(name:"coolingSetpoint", value: value)
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), value)
-}
-
-def coolDown() {
-	def ts = device.currentState("coolingSetpoint")
-	def value = ts ? ts.integerValue - 1 : 76
-	sendEvent(name:"coolingSetpoint", value: value)
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), value)
-}
