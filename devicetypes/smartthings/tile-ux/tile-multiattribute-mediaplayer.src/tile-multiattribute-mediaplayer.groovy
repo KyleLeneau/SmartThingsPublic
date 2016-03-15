@@ -102,9 +102,27 @@ metadata {
 				attributeState("default", label:"${currentValue}")
 			}
 		}
+		multiAttributeTile(name: "mediaMultiNoMarquee", type:"mediaPlayer", width:6, height:4) {
+			tileAttribute("device.status", key: "PRIMARY_CONTROL") {
+				attributeState("paused", label:"Paused",)
+				attributeState("playing", label:"Playing")
+				attributeState("stopped", label:"Stopped")
+			}
+			tileAttribute("device.status", key: "MEDIA_STATUS") {
+				attributeState("paused", label:"Paused", action:"music Player.play", nextState: "playing")
+				attributeState("playing", label:"Playing", action:"music Player.pause", nextState: "paused")
+				attributeState("stopped", label:"Stopped", action:"music Player.play", nextState: "playing")
+			}
+			tileAttribute("device.status", key: "PREVIOUS_TRACK") {
+				attributeState("default", action:"music Player.previousTrack")
+			}
+			tileAttribute("device.status", key: "NEXT_TRACK") {
+				attributeState("default", action:"music Player.nextTrack")
+			}
+		}
 
 		main "mediaMulti"
-		details(["mediaMulti", "mediaMultiLongDescription", "mediaMultiNoLevel"])
+		details(["mediaMulti", "mediaMultiLongDescription", "mediaMultiNoLevel", "mediaMultiNoMarquee"])
 	}
 }
 
