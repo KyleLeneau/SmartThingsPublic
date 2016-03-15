@@ -53,9 +53,58 @@ metadata {
 				attributeState("default", label:"${currentValue}")
 			}
 		}
+		multiAttributeTile(name: "mediaMultiLongDescription", type:"mediaPlayer", width:6, height:4) {
+			tileAttribute("device.status", key: "PRIMARY_CONTROL") {
+				attributeState("paused", label:"Paused",)
+				attributeState("playing", label:"Playing")
+				attributeState("stopped", label:"Stopped")
+			}
+			tileAttribute("device.status", key: "MEDIA_STATUS") {
+				attributeState("paused", label:"Paused", action:"music Player.play", nextState: "playing")
+				attributeState("playing", label:"Playing", action:"music Player.pause", nextState: "paused")
+				attributeState("stopped", label:"Stopped", action:"music Player.play", nextState: "playing")
+			}
+			tileAttribute("device.status", key: "PREVIOUS_TRACK") {
+				attributeState("default", action:"music Player.previousTrack")
+			}
+			tileAttribute("device.status", key: "NEXT_TRACK") {
+				attributeState("default", action:"music Player.nextTrack")
+			}
+			tileAttribute ("device.level", key: "SLIDER_CONTROL") {
+				attributeState("level", action:"music Player.setLevel")
+			}
+			tileAttribute ("device.mute", key: "MEDIA_MUTED") {
+				attributeState("unmuted", action:"music Player.mute", nextState: "muted")
+				attributeState("muted", action:"music Player.unmute", nextState: "unmuted")
+			}
+			tileAttribute("device.trackDescriptionLong", key: "MARQUEE") {
+				attributeState("default", label:"${currentValue}")
+			}
+		}
+		multiAttributeTile(name: "mediaMultiNoLevel", type:"mediaPlayer", width:6, height:4) {
+			tileAttribute("device.status", key: "PRIMARY_CONTROL") {
+				attributeState("paused", label:"Paused",)
+				attributeState("playing", label:"Playing")
+				attributeState("stopped", label:"Stopped")
+			}
+			tileAttribute("device.status", key: "MEDIA_STATUS") {
+				attributeState("paused", label:"Paused", action:"music Player.play", nextState: "playing")
+				attributeState("playing", label:"Playing", action:"music Player.pause", nextState: "paused")
+				attributeState("stopped", label:"Stopped", action:"music Player.play", nextState: "playing")
+			}
+			tileAttribute("device.status", key: "PREVIOUS_TRACK") {
+				attributeState("default", action:"music Player.previousTrack")
+			}
+			tileAttribute("device.status", key: "NEXT_TRACK") {
+				attributeState("default", action:"music Player.nextTrack")
+			}
+			tileAttribute("device.trackDescription", key: "MARQUEE") {
+				attributeState("default", label:"${currentValue}")
+			}
+		}
 
 		main "mediaMulti"
-		details(["mediaMulti"])
+		details(["mediaMulti", "mediaMultiLongDescription", "mediaMultiNoLevel"])
 	}
 }
 
@@ -81,12 +130,12 @@ def parse(description) {
 
 def play() {
 	sendEvent(name: "status", value: "playing")
-	sendEvent(name: "trackDescription", value: state.tracks[state.currentTrack])
+	sendDescriptionEvent()
 }
 
 def pause() {
 	sendEvent(name: "status", value: "paused")
-	sendEvent(name: "trackDescription", value: state.tracks[state.currentTrack])
+	sendDescriptionEvent()
 }
 
 def stop() {
@@ -98,7 +147,7 @@ def previousTrack() {
 	if (state.currentTrack < 0)
 		state.currentTrack = state.tracks.size()-1
 
-	sendEvent(name: "trackDescription", value: state.tracks[state.currentTrack])
+	sendDescriptionEvent()
 }
 
 def nextTrack() {
@@ -106,7 +155,7 @@ def nextTrack() {
 	if (state.currentTrack == state.tracks.size())
 		state.currentTrack = 0
 
-	sendEvent(name: "trackDescription", value: state.tracks[state.currentTrack])
+	sendDescriptionEvent()
 }
 
 def mute() {
@@ -119,4 +168,10 @@ def unmute() {
 
 def setLevel(level) {
 	sendEvent(name: "level", value: level)
+}
+
+def sendDescriptionEvent() {
+	def track = state.tracks[state.currentTrack]
+	sendEvent(name: "trackDescription", value: track)
+	sendEvent(name: "trackDescriptionLong", value: track.replaceAll("\n", "—"))
 }
