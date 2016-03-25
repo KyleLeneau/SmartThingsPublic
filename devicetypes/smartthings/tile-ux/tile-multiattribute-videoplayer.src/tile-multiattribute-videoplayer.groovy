@@ -4,7 +4,7 @@
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *	  http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
@@ -17,213 +17,153 @@ metadata {
 		namespace: "smartthings/tile-ux",
 		author: "SmartThings") {
 
-		capability "Thermostat"
-		capability "Relative Humidity Measurement"
+		capability "Configuration"
+		capability "Video Camera"
+		capability "Video Capture"
+		capability "Refresh"
+		capability "Switch"
 
-		command "tempUp"
-		command "tempDown"
-		command "heatUp"
-		command "heatDown"
-		command "coolUp"
-		command "coolDown"
-		command "setTemperature", ["number"]
+		// custom commands
+		command "start"
+		command "stop"
+		command "setProfileHD"
+		command "setProfileSDH"
+		command "setProfileSDL"
 	}
 
 	tiles(scale: 2) {
-		multiAttributeTile(name:"thermostatMulti", type:"thermostat", width:6, height:4) {
-			tileAttribute("device.temperature", key: "PRIMARY_CONTROL") {
-				attributeState("default", label:'${currentValue}', unit:"dF")
+		multiAttributeTile(name: "videoPlayer", type: "videoPlayer", width: 6, height: 4) {
+			tileAttribute("device.switch", key: "CAMERA_STATUS") {
+				attributeState("on", label: "Active", icon: "st.camera.dlink-indoor", action: "switch.off", backgroundColor: "#79b821", defaultState: true)
+				attributeState("off", label: "Inactive", icon: "st.camera.dlink-indoor", action: "switch.on", backgroundColor: "#ffffff")
+				attributeState("restarting", label: "Connecting", icon: "st.camera.dlink-indoor", backgroundColor: "#53a7c0")
+				attributeState("unavailable", label: "Unavailable", icon: "st.camera.dlink-indoor", action: "refresh.refresh", backgroundColor: "#F22000")
 			}
-			tileAttribute("device.temperature", key: "VALUE_CONTROL") {
-				attributeState("default", action: "setTemperature")
+
+			tileAttribute("device.errorMessage", key: "CAMERA_ERROR_MESSAGE") {
+				attributeState("errorMessage", label: "", value: "", defaultState: true)
 			}
-			tileAttribute("device.humidity", key: "SECONDARY_CONTROL") {
-				attributeState("default", label:'${currentValue}%', unit:"%")
+
+			tileAttribute("device.camera", key: "PRIMARY_CONTROL") {
+				attributeState("on", label: "Active", icon: "st.camera.dlink-indoor", backgroundColor: "#79b821", defaultState: true)
+				attributeState("off", label: "Inactive", icon: "st.camera.dlink-indoor", backgroundColor: "#ffffff")
+				attributeState("restarting", label: "Connecting", icon: "st.camera.dlink-indoor", backgroundColor: "#53a7c0")
+				attributeState("unavailable", label: "Unavailable", icon: "st.camera.dlink-indoor", backgroundColor: "#F22000")
 			}
-			tileAttribute("device.thermostatOperatingState", key: "OPERATING_STATE") {
-				attributeState("idle", backgroundColor:"#44b621")
-				attributeState("heating", backgroundColor:"#ffa81e")
-				attributeState("cooling", backgroundColor:"#269bd2")
+
+			tileAttribute("device.startLive", key: "START_LIVE") {
+				attributeState("live", action: "start", defaultState: true)
 			}
-			tileAttribute("device.thermostatMode", key: "THERMOSTAT_MODE") {
-				attributeState("off", label:'${name}')
-				attributeState("heat", label:'${name}')
-				attributeState("cool", label:'${name}')
-				attributeState("auto", label:'${name}')
+
+			tileAttribute("device.stream", key: "STREAM_URL") {
+				attributeState("activeURL", defaultState: true)
 			}
-			tileAttribute("device.heatingSetpoint", key: "HEATING_SETPOINT") {
-				attributeState("default", label:'${currentValue}', unit:"dF")
+
+			tileAttribute("device.profile", key: "STREAM_QUALITY") {
+				attributeState("1", label: "720p", action: "setProfileHD", defaultState: true)
+				attributeState("2", label: "h360p", action: "setProfileSDH", defaultState: true)
+				attributeState("3", label: "l360p", action: "setProfileSDL", defaultState: true)
 			}
-			tileAttribute("device.coolingSetpoint", key: "COOLING_SETPOINT") {
-				attributeState("default", label:'${currentValue}', unit:"dF")
+
+			tileAttribute("device.betaLogo", key: "BETA_LOGO") {
+				attributeState("betaLogo", label: "", value: "", defaultState: true)
+			}
+		}
+		
+		multiAttributeTile(name: "videoPlayerMin", type: "videoPlayer", width: 6, height: 4) {
+			tileAttribute("device.switch", key: "CAMERA_STATUS") {
+				attributeState("on", label: "Active", icon: "st.camera.dlink-indoor", action: "switch.off", backgroundColor: "#79b821", defaultState: true)
+				attributeState("off", label: "Inactive", icon: "st.camera.dlink-indoor", action: "switch.on", backgroundColor: "#ffffff")
+				attributeState("restarting", label: "Connecting", icon: "st.camera.dlink-indoor", backgroundColor: "#53a7c0")
+				attributeState("unavailable", label: "Unavailable", icon: "st.camera.dlink-indoor", action: "refresh.refresh", backgroundColor: "#F22000")
+			}
+
+			tileAttribute("device.errorMessage", key: "CAMERA_ERROR_MESSAGE") {
+				attributeState("errorMessage", label: "", value: "", defaultState: true)
+			}
+
+			tileAttribute("device.camera", key: "PRIMARY_CONTROL") {
+				attributeState("on", label: "Active", icon: "st.camera.dlink-indoor", backgroundColor: "#79b821", defaultState: true)
+				attributeState("off", label: "Inactive", icon: "st.camera.dlink-indoor", backgroundColor: "#ffffff")
+				attributeState("restarting", label: "Connecting", icon: "st.camera.dlink-indoor", backgroundColor: "#53a7c0")
+				attributeState("unavailable", label: "Unavailable", icon: "st.camera.dlink-indoor", backgroundColor: "#F22000")
+			}
+
+			tileAttribute("device.startLive", key: "START_LIVE") {
+				attributeState("live", action: "start", defaultState: true)
+			}
+
+			tileAttribute("device.stream", key: "STREAM_URL") {
+				attributeState("activeURL", defaultState: true)
 			}
 		}
 
-		main("thermostatMulti")
+		main("videoPlayer")
 		details([
-			"thermostatMulti"
+			"videoPlayer", "videoPlayerMin"
 		])
 	}
 }
 
 def installed() {
-	sendEvent(name: "temperature", value: 72, unit: "F")
-	sendEvent(name: "heatingSetpoint", value: 70, unit: "F")
-	sendEvent(name: "thermostatSetpoint", value: 70, unit: "F")
-	sendEvent(name: "coolingSetpoint", value: 76, unit: "F")
-	sendEvent(name: "thermostatMode", value: "off")
-	sendEvent(name: "thermostatFanMode", value: "fanAuto")
-	sendEvent(name: "thermostatOperatingState", value: "idle")
-	sendEvent(name: "humidity", value: 53, unit: "%")
 }
 
 def parse(String description) {
 }
 
-def evaluate(temp, heatingSetpoint, coolingSetpoint) {
-	log.debug "evaluate($temp, $heatingSetpoint, $coolingSetpoint"
-	def threshold = 1.0
-	def current = device.currentValue("thermostatOperatingState")
-	def mode = device.currentValue("thermostatMode")
-
-	def heating = false
-	def cooling = false
-	def idle = false
-	if (mode in ["heat","emergency heat","auto"]) {
-		if (heatingSetpoint - temp >= threshold) {
-			heating = true
-			sendEvent(name: "thermostatOperatingState", value: "heating")
-		}
-		else if (temp - heatingSetpoint >= threshold) {
-			idle = true
-		}
-		sendEvent(name: "thermostatSetpoint", value: heatingSetpoint)
-	}
-	if (mode in ["cool","auto"]) {
-		if (temp - coolingSetpoint >= threshold) {
-			cooling = true
-			sendEvent(name: "thermostatOperatingState", value: "cooling")
-		}
-		else if (coolingSetpoint - temp >= threshold && !heating) {
-			idle = true
-		}
-		sendEvent(name: "thermostatSetpoint", value: coolingSetpoint)
-	}
-	else {
-		sendEvent(name: "thermostatSetpoint", value: heatingSetpoint)
-	}
-	if (idle && !heating && !cooling) {
-		sendEvent(name: "thermostatOperatingState", value: "idle")
-	}
+def refresh() {
+	log.trace "refresh()"
+	// no-op
 }
 
-def setHeatingSetpoint(Double degreesF) {
-	log.debug "setHeatingSetpoint($degreesF)"
-	sendEvent(name: "heatingSetpoint", value: degreesF)
-	evaluate(device.currentValue("temperature"), degreesF, device.currentValue("coolingSetpoint"))
-}
-
-def setCoolingSetpoint(Double degreesF) {
-	log.debug "setCoolingSetpoint($degreesF)"
-	sendEvent(name: "coolingSetpoint", value: degreesF)
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), degreesF)
-}
-
-def setThermostatMode(String value) {
-	sendEvent(name: "thermostatMode", value: value)
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def setThermostatFanMode(String value) {
-	sendEvent(name: "thermostatFanMode", value: value)
+def on() {
+	log.trace "on()"
+	// no-op
 }
 
 def off() {
-	sendEvent(name: "thermostatMode", value: "off")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
+	log.trace "off()"
+	// no-op
 }
 
-def heat() {
-	sendEvent(name: "thermostatMode", value: "heat")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
+def setProfile(profile) {
+	log.trace "setProfile(): ${profile}"
+	sendEvent(name: "profile", value: profile, displayed: false)
 }
 
-def auto() {
-	sendEvent(name: "thermostatMode", value: "auto")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
+def setProfileHD() {
+	setProfile(1)
 }
 
-def emergencyHeat() {
-	sendEvent(name: "thermostatMode", value: "emergency heat")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
+def setProfileSDH() {
+	setProfile(2)
 }
 
-def cool() {
-	sendEvent(name: "thermostatMode", value: "cool")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
+def setProfileSDL() {
+	setProfile(3)
 }
 
-def fanOn() {
-	sendEvent(name: "thermostatFanMode", value: "fanOn")
+def start() {
+	log.trace "start()"
+	def dataLiveVideo = [
+		OutHomeURL  : "https://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8",
+		InHomeURL   : "https://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8",
+		ThumbnailURL: "http://cdn.device-icons.smartthings.com/camera/dlink-indoor@2x.png",
+		cookie      : [key: "key", value: "value"]
+	]
+
+	def event = [
+		name           : "stream",
+		value          : groovy.json.JsonOutput.toJson(dataLiveVideo).toString(),
+		data		   : groovy.json.JsonOutput.toJson(dataLiveVideo),
+		descriptionText: "Starting the livestream",
+		eventType      : "VIDEO",
+		displayed      : false,
+		isStateChange  : true
+	]
+	sendEvent(event)
 }
 
-def fanAuto() {
-	sendEvent(name: "thermostatFanMode", value: "fanAuto")
-}
-
-def fanCirculate() {
-	sendEvent(name: "thermostatFanMode", value: "fanCirculate")
-}
-
-def poll() {
-	null
-}
-
-def tempUp() {
-	def ts = device.currentState("temperature")
-	def value = ts ? ts.integerValue + 1 : 72
-	sendEvent(name:"temperature", value: value)
-	evaluate(value, device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def tempDown() {
-	def ts = device.currentState("temperature")
-	def value = ts ? ts.integerValue - 1 : 72
-	sendEvent(name:"temperature", value: value)
-	evaluate(value, device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def setTemperature(value) {
-	def ts = device.currentState("temperature")
-	sendEvent(name:"temperature", value: value)
-	evaluate(value, device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def heatUp() {
-	def ts = device.currentState("heatingSetpoint")
-	def value = ts ? ts.integerValue + 1 : 68
-	sendEvent(name:"heatingSetpoint", value: value)
-	evaluate(device.currentValue("temperature"), value, device.currentValue("coolingSetpoint"))
-}
-
-def heatDown() {
-	def ts = device.currentState("heatingSetpoint")
-	def value = ts ? ts.integerValue - 1 : 68
-	sendEvent(name:"heatingSetpoint", value: value)
-	evaluate(device.currentValue("temperature"), value, device.currentValue("coolingSetpoint"))
-}
-
-
-def coolUp() {
-	def ts = device.currentState("coolingSetpoint")
-	def value = ts ? ts.integerValue + 1 : 76
-	sendEvent(name:"coolingSetpoint", value: value)
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), value)
-}
-
-def coolDown() {
-	def ts = device.currentState("coolingSetpoint")
-	def value = ts ? ts.integerValue - 1 : 76
-	sendEvent(name:"coolingSetpoint", value: value)
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), value)
+def stop() {
+	log.trace "stop()"
 }
