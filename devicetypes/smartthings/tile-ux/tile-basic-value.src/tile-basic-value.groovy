@@ -17,213 +17,80 @@ metadata {
 		namespace: "smartthings/tile-ux",
 		author: "SmartThings") {
 
-		capability "Thermostat"
-		capability "Relative Humidity Measurement"
-
-		command "tempUp"
-		command "tempDown"
-		command "heatUp"
-		command "heatDown"
-		command "coolUp"
-		command "coolDown"
-		command "setTemperature", ["number"]
+		capability "Sensor"
 	}
 
 	tiles(scale: 2) {
-		multiAttributeTile(name:"thermostatMulti", type:"thermostat", width:6, height:4) {
-			tileAttribute("device.temperature", key: "PRIMARY_CONTROL") {
-				attributeState("default", label:'${currentValue}', unit:"dF")
-			}
-			tileAttribute("device.temperature", key: "VALUE_CONTROL") {
-				attributeState("default", action: "setTemperature")
-			}
-			tileAttribute("device.humidity", key: "SECONDARY_CONTROL") {
-				attributeState("default", label:'${currentValue}%', unit:"%")
-			}
-			tileAttribute("device.thermostatOperatingState", key: "OPERATING_STATE") {
-				attributeState("idle", backgroundColor:"#44b621")
-				attributeState("heating", backgroundColor:"#ffa81e")
-				attributeState("cooling", backgroundColor:"#269bd2")
-			}
-			tileAttribute("device.thermostatMode", key: "THERMOSTAT_MODE") {
-				attributeState("off", label:'${name}')
-				attributeState("heat", label:'${name}')
-				attributeState("cool", label:'${name}')
-				attributeState("auto", label:'${name}')
-			}
-			tileAttribute("device.heatingSetpoint", key: "HEATING_SETPOINT") {
-				attributeState("default", label:'${currentValue}', unit:"dF")
-			}
-			tileAttribute("device.coolingSetpoint", key: "COOLING_SETPOINT") {
-				attributeState("default", label:'${currentValue}', unit:"dF")
-			}
+		valueTile("text", "device.text", width: 2, height: 2) {
+			state "default", label:'${currentValue}'
 		}
 
-		main("thermostatMulti")
+		valueTile("longText", "device.longText", width: 2, height: 2) {
+			state "default", label:'${currentValue}'
+		}
+
+		valueTile("integer", "device.integer", width: 2, height: 2) {
+			state "default", label:'${currentValue}'
+		}
+
+		valueTile("integerFloat", "device.integerFloat", width: 2, height: 2) {
+			state "default", label:'${currentValue}'
+		}
+
+		valueTile("pi", "device.pi", width: 2, height: 2) {
+			state "default", label:'${currentValue}'
+		}
+
+		valueTile("floatAsText", "device.floatAsText", width: 2, height: 2) {
+			state "default", label:'${currentValue}'
+		}
+
+		valueTile("bgColor", "device.integer", width: 2, height: 2) {
+			state "default", label:'${currentValue}', backgroundColor: "#e86d13"
+		}
+
+		valueTile("bgColorRange", "device.integer", width: 2, height: 2) {
+			state "default", label:'${currentValue}', backgroundColors: [
+				[value: 10, color: "#ff0000"],
+				[value: 90, color: "#0000ff"]
+			]
+		}
+
+		valueTile("bgColorRangeSingleItem", "device.integer", width: 2, height: 2) {
+			state "default", label:'${currentValue}', backgroundColors: [
+				[value: 10, color: "#333333"]
+			]
+		}
+
+		valueTile("bgColorRangeConflict", "device.integer", width: 2, height: 2) {
+			state "default", label:'${currentValue}', backgroundColors: [
+				[value: 10, color: "#990000"],
+				[value: 10, color: "#000099"]
+			]
+		}
+
+		valueTile("noValue", "device.nada", width: 2, height: 2) {
+			state "default", label:'${currentValue}'
+		}
+
+		main("text")
 		details([
-			"thermostatMulti"
+			"text", "longText", "integer", 
+            "integerFloat", "pi", "floatAsText",
+            "bgColor", "bgColorRange", "bgColorRangeSingleItem",
+            "bgColorRangeConflict", "noValue"
 		])
 	}
 }
 
 def installed() {
-	sendEvent(name: "temperature", value: 72, unit: "F")
-	sendEvent(name: "heatingSetpoint", value: 70, unit: "F")
-	sendEvent(name: "thermostatSetpoint", value: 70, unit: "F")
-	sendEvent(name: "coolingSetpoint", value: 76, unit: "F")
-	sendEvent(name: "thermostatMode", value: "off")
-	sendEvent(name: "thermostatFanMode", value: "fanAuto")
-	sendEvent(name: "thermostatOperatingState", value: "idle")
-	sendEvent(name: "humidity", value: 53, unit: "%")
+	sendEvent(name: "text", value: "Test")
+	sendEvent(name: "longText", value: "The Longer The Text, The Better The Test")
+	sendEvent(name: "integer", value: 47)
+	sendEvent(name: "integerFloat", value: 47.0)
+	sendEvent(name: "pi", value: 3.14159)
+	sendEvent(name: "floatAsText", value: "3.14159")
 }
 
 def parse(String description) {
-}
-
-def evaluate(temp, heatingSetpoint, coolingSetpoint) {
-	log.debug "evaluate($temp, $heatingSetpoint, $coolingSetpoint"
-	def threshold = 1.0
-	def current = device.currentValue("thermostatOperatingState")
-	def mode = device.currentValue("thermostatMode")
-
-	def heating = false
-	def cooling = false
-	def idle = false
-	if (mode in ["heat","emergency heat","auto"]) {
-		if (heatingSetpoint - temp >= threshold) {
-			heating = true
-			sendEvent(name: "thermostatOperatingState", value: "heating")
-		}
-		else if (temp - heatingSetpoint >= threshold) {
-			idle = true
-		}
-		sendEvent(name: "thermostatSetpoint", value: heatingSetpoint)
-	}
-	if (mode in ["cool","auto"]) {
-		if (temp - coolingSetpoint >= threshold) {
-			cooling = true
-			sendEvent(name: "thermostatOperatingState", value: "cooling")
-		}
-		else if (coolingSetpoint - temp >= threshold && !heating) {
-			idle = true
-		}
-		sendEvent(name: "thermostatSetpoint", value: coolingSetpoint)
-	}
-	else {
-		sendEvent(name: "thermostatSetpoint", value: heatingSetpoint)
-	}
-	if (idle && !heating && !cooling) {
-		sendEvent(name: "thermostatOperatingState", value: "idle")
-	}
-}
-
-def setHeatingSetpoint(Double degreesF) {
-	log.debug "setHeatingSetpoint($degreesF)"
-	sendEvent(name: "heatingSetpoint", value: degreesF)
-	evaluate(device.currentValue("temperature"), degreesF, device.currentValue("coolingSetpoint"))
-}
-
-def setCoolingSetpoint(Double degreesF) {
-	log.debug "setCoolingSetpoint($degreesF)"
-	sendEvent(name: "coolingSetpoint", value: degreesF)
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), degreesF)
-}
-
-def setThermostatMode(String value) {
-	sendEvent(name: "thermostatMode", value: value)
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def setThermostatFanMode(String value) {
-	sendEvent(name: "thermostatFanMode", value: value)
-}
-
-def off() {
-	sendEvent(name: "thermostatMode", value: "off")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def heat() {
-	sendEvent(name: "thermostatMode", value: "heat")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def auto() {
-	sendEvent(name: "thermostatMode", value: "auto")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def emergencyHeat() {
-	sendEvent(name: "thermostatMode", value: "emergency heat")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def cool() {
-	sendEvent(name: "thermostatMode", value: "cool")
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def fanOn() {
-	sendEvent(name: "thermostatFanMode", value: "fanOn")
-}
-
-def fanAuto() {
-	sendEvent(name: "thermostatFanMode", value: "fanAuto")
-}
-
-def fanCirculate() {
-	sendEvent(name: "thermostatFanMode", value: "fanCirculate")
-}
-
-def poll() {
-	null
-}
-
-def tempUp() {
-	def ts = device.currentState("temperature")
-	def value = ts ? ts.integerValue + 1 : 72
-	sendEvent(name:"temperature", value: value)
-	evaluate(value, device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def tempDown() {
-	def ts = device.currentState("temperature")
-	def value = ts ? ts.integerValue - 1 : 72
-	sendEvent(name:"temperature", value: value)
-	evaluate(value, device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def setTemperature(value) {
-	def ts = device.currentState("temperature")
-	sendEvent(name:"temperature", value: value)
-	evaluate(value, device.currentValue("heatingSetpoint"), device.currentValue("coolingSetpoint"))
-}
-
-def heatUp() {
-	def ts = device.currentState("heatingSetpoint")
-	def value = ts ? ts.integerValue + 1 : 68
-	sendEvent(name:"heatingSetpoint", value: value)
-	evaluate(device.currentValue("temperature"), value, device.currentValue("coolingSetpoint"))
-}
-
-def heatDown() {
-	def ts = device.currentState("heatingSetpoint")
-	def value = ts ? ts.integerValue - 1 : 68
-	sendEvent(name:"heatingSetpoint", value: value)
-	evaluate(device.currentValue("temperature"), value, device.currentValue("coolingSetpoint"))
-}
-
-
-def coolUp() {
-	def ts = device.currentState("coolingSetpoint")
-	def value = ts ? ts.integerValue + 1 : 76
-	sendEvent(name:"coolingSetpoint", value: value)
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), value)
-}
-
-def coolDown() {
-	def ts = device.currentState("coolingSetpoint")
-	def value = ts ? ts.integerValue - 1 : 76
-	sendEvent(name:"coolingSetpoint", value: value)
-	evaluate(device.currentValue("temperature"), device.currentValue("heatingSetpoint"), value)
 }

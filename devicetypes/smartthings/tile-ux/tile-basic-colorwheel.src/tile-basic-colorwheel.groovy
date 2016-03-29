@@ -21,11 +21,15 @@ metadata {
 	}
 
 	tiles(scale: 2) {
-		controlTile("rgbSelector", "device.color", "color", height: 6, width: 6, inactiveLabel: false) {
-			state "color"
+		valueTile("currentColor", "device.color") {
+			state "default", label: '${currentValue}'
 		}
 
-		main("rgbSelector")
+		controlTile("rgbSelector", "device.color", "color", height: 6, width: 6, inactiveLabel: false) {
+			state "color", action: "color control.setColor"
+		}
+
+		main("currentColor")
 		details([
 			"rgbSelector"
 		])
